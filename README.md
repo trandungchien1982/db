@@ -11,3 +11,19 @@ Hay thiet ke DB (tables, fields, primary key, foreign key) cua 'Order Management
 - order_items(id, order_id, product_id, ...., priority, quantity)
 - inventories(id, product_id, quantity, inputted_at)
 ```
+
+- Mockaroo script
+```declarative
+__rownum: Row Number (Hidden field)
+
+name:
+pad(__rownum, 4, "0", "left") + "-" + this
+
+gender: 
+if this == 'Male' then 'MALE'
+elseif this == 'Female' then 'FEMALE'
+else 'OTHER' end
+
+active: 'true'
+```
+- 

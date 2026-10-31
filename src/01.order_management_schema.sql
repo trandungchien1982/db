@@ -7,9 +7,10 @@ BEGIN;
 
 -- 1. Customers
 CREATE TABLE public.customers (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    id BIGINT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
     gender VARCHAR(10) CHECK (gender IN ('MALE', 'FEMALE', 'OTHER')),
+    address TEXT,
     birthday DATE,
     active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -18,24 +19,26 @@ CREATE TABLE public.customers (
 
 -- 2. Products
 CREATE TABLE public.products (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    id BIGINT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
     code VARCHAR(50) NOT NULL UNIQUE,
     price NUMERIC(15,2) NOT NULL CHECK (price >= 0),
     description TEXT,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- 3. Orders
 CREATE TABLE public.orders (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id BIGINT PRIMARY KEY,
     customer_id BIGINT NOT NULL,
     order_code VARCHAR(50) NOT NULL UNIQUE,
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING'
         CHECK (status IN ('PENDING', 'CONFIRMED', 'PROCESSING', 'COMPLETED', 'CANCELLED')),
     total_amount NUMERIC(15,2) NOT NULL DEFAULT 0 CHECK (total_amount >= 0),
     note TEXT,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_orders_customer FOREIGN KEY (customer_id)
@@ -44,12 +47,12 @@ CREATE TABLE public.orders (
 
 -- 4. Order items
 CREATE TABLE public.order_items (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id BIGINT PRIMARY KEY,
     order_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,
     quantity INTEGER NOT NULL CHECK (quantity > 0),
     unit_price NUMERIC(15,2) NOT NULL CHECK (unit_price >= 0),
-    priority SMALLINT NOT NULL DEFAULT 3 CHECK (priority BETWEEN 1 AND 5),
+    priority SMALLINT NOT NULL DEFAULT 3,
     subtotal NUMERIC(17,2) GENERATED ALWAYS AS (quantity * unit_price) STORED,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -62,8 +65,8 @@ CREATE TABLE public.order_items (
 
 -- 5. Inventories: each record represents an inventory input.
 CREATE TABLE public.inventories (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    product_id BIGINT NOT NULL,
+    id BIGINT PRIMARY KEY,
+    product_id BIGINT NOT NULL UNIQUE,
     quantity INTEGER NOT NULL CHECK (quantity >= 0),
     inputted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_inventories_product FOREIGN KEY (product_id)
